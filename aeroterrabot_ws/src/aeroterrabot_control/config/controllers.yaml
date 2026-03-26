@@ -1,0 +1,169 @@
+# =============================================================================
+# AeroTerraBot Controller Configuration
+# =============================================================================
+# This file configures all ros2_control controllers for the hybrid platform.
+# Controllers are organized by subsystem: wheels, legs, arms, rotors.
+# Runtime switching is managed by controller_manager.
+# =============================================================================
+
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    # --- Joint State Broadcaster (always active) ---
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    # --- Wheel Velocity Controller (diff drive) ---
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController
+
+    # --- Wheel Velocity Controller (individual) ---
+    wheel_velocity_controller:
+      type: velocity_controllers/JointGroupVelocityController
+
+    # --- Leg Joint Position Controller ---
+    leg_joint_position_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    # --- Transform (Arm) Joint Position Controller ---
+    transform_joint_position_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    # --- Rotor Velocity Controller ---
+    rotor_velocity_controller:
+      type: velocity_controllers/JointGroupVelocityController
+
+
+# =============================================================================
+# Diff Drive Controller (wheel_mode primary navigation)
+# =============================================================================
+diff_drive_controller:
+  ros__parameters:
+    left_wheel_names:
+      - fl_wheel_joint
+      - rl_wheel_joint
+    right_wheel_names:
+      - fr_wheel_joint
+      - rr_wheel_joint
+
+    wheel_separation: 0.4
+    wheel_radius: 0.06
+
+    wheel_separation_multiplier: 1.0
+    left_wheel_radius_multiplier: 1.0
+    right_wheel_radius_multiplier: 1.0
+
+    publish_rate: 50.0
+    odom_frame_id: odom
+    base_frame_id: base_link
+
+    pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
+    twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
+
+    open_loop: false
+    enable_odom_tf: true
+
+    cmd_vel_timeout: 0.5
+    publish_limited_velocity: true
+    velocity_rolling_window_size: 10
+
+    linear.x.has_velocity_limits: true
+    linear.x.has_acceleration_limits: true
+    linear.x.has_jerk_limits: false
+    linear.x.max_velocity: 2.0
+    linear.x.min_velocity: -2.0
+    linear.x.max_acceleration: 3.0
+    linear.x.min_acceleration: -3.0
+
+    angular.z.has_velocity_limits: true
+    angular.z.has_acceleration_limits: true
+    angular.z.has_jerk_limits: false
+    angular.z.max_velocity: 3.0
+    angular.z.min_velocity: -3.0
+    angular.z.max_acceleration: 5.0
+    angular.z.min_acceleration: -5.0
+
+
+# =============================================================================
+# Individual Wheel Velocity Controller
+# =============================================================================
+wheel_velocity_controller:
+  ros__parameters:
+    joints:
+      - fl_wheel_joint
+      - fr_wheel_joint
+      - rl_wheel_joint
+      - rr_wheel_joint
+
+
+# =============================================================================
+# Leg Joint Trajectory Controller
+# =============================================================================
+leg_joint_position_controller:
+  ros__parameters:
+    joints:
+      - fl_upper_leg_joint
+      - fr_upper_leg_joint
+      - rl_upper_leg_joint
+      - rr_upper_leg_joint
+      - fl_lower_leg_joint
+      - fr_lower_leg_joint
+      - rl_lower_leg_joint
+      - rr_lower_leg_joint
+
+    command_interfaces:
+      - position
+
+    state_interfaces:
+      - position
+      - velocity
+
+    state_publish_rate: 50.0
+    action_monitor_rate: 20.0
+
+    allow_partial_joints_goal: true
+
+    constraints:
+      stopped_velocity_tolerance: 0.01
+      goal_time: 0.0
+
+
+# =============================================================================
+# Transform (Arm) Joint Trajectory Controller
+# =============================================================================
+transform_joint_position_controller:
+  ros__parameters:
+    joints:
+      - front_left_arm_joint
+      - front_right_arm_joint
+      - rear_left_arm_joint
+      - rear_right_arm_joint
+
+    command_interfaces:
+      - position
+
+    state_interfaces:
+      - position
+      - velocity
+
+    state_publish_rate: 50.0
+    action_monitor_rate: 20.0
+
+    allow_partial_joints_goal: true
+
+    constraints:
+      stopped_velocity_tolerance: 0.01
+      goal_time: 0.0
+
+
+# =============================================================================
+# Rotor Velocity Controller
+# =============================================================================
+rotor_velocity_controller:
+  ros__parameters:
+    joints:
+      - rotor_1_joint
+      - rotor_2_joint
+      - rotor_3_joint
+      - rotor_4_joint

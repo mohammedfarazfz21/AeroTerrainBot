@@ -1,0 +1,639 @@
+<?xml version="1.0"?>
+<!-- ================================================================
+     AeroTerraBot - Main Robot XACRO Model
+     Hybrid Morphing Autonomy Platform
+     
+     TF Tree:
+       base_link
+         ├── base_footprint
+         ├── {fl,fr,rl,rr}_upper_leg_link
+         │     └── {fl,fr,rl,rr}_lower_leg_link
+         │           └── {fl,fr,rl,rr}_wheel_link
+         ├── {fl,fr,rl,rr}_arm_link
+         │     └── rotor_{1,2,3,4}_link
+         ├── lidar_link
+         ├── camera_link
+         └── imu_link
+     ================================================================ -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="aeroterrabot">
+
+  <!-- ===================== PROPERTIES ===================== -->
+  <xacro:property name="chassis_mass" value="12.0"/>
+  <xacro:property name="chassis_length" value="0.6"/>
+  <xacro:property name="chassis_width" value="0.4"/>
+  <xacro:property name="chassis_height" value="0.15"/>
+
+  <xacro:property name="upper_leg_mass" value="0.8"/>
+  <xacro:property name="upper_leg_length" value="0.20"/>
+  <xacro:property name="upper_leg_radius" value="0.025"/>
+
+  <xacro:property name="lower_leg_mass" value="0.6"/>
+  <xacro:property name="lower_leg_length" value="0.18"/>
+  <xacro:property name="lower_leg_radius" value="0.02"/>
+
+  <xacro:property name="wheel_mass" value="0.5"/>
+  <xacro:property name="wheel_radius" value="0.06"/>
+  <xacro:property name="wheel_width" value="0.04"/>
+
+  <xacro:property name="arm_mass" value="0.4"/>
+  <xacro:property name="arm_length" value="0.30"/>
+  <xacro:property name="arm_radius" value="0.015"/>
+
+  <xacro:property name="rotor_mass" value="0.15"/>
+  <xacro:property name="rotor_radius" value="0.12"/>
+  <xacro:property name="rotor_thickness" value="0.01"/>
+
+  <!-- ===================== MATERIALS ===================== -->
+  <material name="dark_grey">
+    <color rgba="0.2 0.2 0.2 1.0"/>
+  </material>
+  <material name="orange">
+    <color rgba="1.0 0.55 0.0 1.0"/>
+  </material>
+  <material name="light_grey">
+    <color rgba="0.7 0.7 0.7 1.0"/>
+  </material>
+  <material name="blue">
+    <color rgba="0.1 0.3 0.8 1.0"/>
+  </material>
+  <material name="black">
+    <color rgba="0.05 0.05 0.05 1.0"/>
+  </material>
+  <material name="red">
+    <color rgba="0.9 0.1 0.1 1.0"/>
+  </material>
+
+  <!-- ===================== INERTIA MACROS ===================== -->
+  <xacro:macro name="box_inertia" params="m x y z">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${(m/12.0)*(y*y+z*z)}" ixy="0" ixz="0"
+               iyy="${(m/12.0)*(x*x+z*z)}" iyz="0"
+               izz="${(m/12.0)*(x*x+y*y)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${(m/12.0)*(3*r*r+h*h)}" ixy="0" ixz="0"
+               iyy="${(m/12.0)*(3*r*r+h*h)}" iyz="0"
+               izz="${(m/2.0)*(r*r)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="sphere_inertia" params="m r">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${(2.0/5.0)*m*r*r}" ixy="0" ixz="0"
+               iyy="${(2.0/5.0)*m*r*r}" iyz="0"
+               izz="${(2.0/5.0)*m*r*r}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- ===================== BASE LINK ===================== -->
+  <link name="base_footprint"/>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+      <material name="dark_grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="${chassis_mass}" x="${chassis_length}" y="${chassis_width}" z="${chassis_height}"/>
+  </link>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.25" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===================== LEG + WHEEL MACRO ===================== -->
+  <xacro:macro name="leg_wheel_module" params="prefix x_offset y_offset y_sign">
+    <!-- Upper Leg -->
+    <link name="${prefix}_upper_leg_link">
+      <visual>
+        <origin xyz="0 0 ${-upper_leg_length/2.0}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${upper_leg_radius}" length="${upper_leg_length}"/>
+        </geometry>
+        <material name="orange"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-upper_leg_length/2.0}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${upper_leg_radius}" length="${upper_leg_length}"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_inertia m="${upper_leg_mass}" r="${upper_leg_radius}" h="${upper_leg_length}"/>
+    </link>
+
+    <joint name="${prefix}_upper_leg_joint" type="revolute">
+      <parent link="base_link"/>
+      <child link="${prefix}_upper_leg_link"/>
+      <origin xyz="${x_offset} ${y_offset} ${-chassis_height/2.0}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-1.57" upper="1.57" effort="50.0" velocity="2.0"/>
+      <dynamics damping="0.5" friction="0.3"/>
+    </joint>
+
+    <!-- Lower Leg -->
+    <link name="${prefix}_lower_leg_link">
+      <visual>
+        <origin xyz="0 0 ${-lower_leg_length/2.0}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${lower_leg_radius}" length="${lower_leg_length}"/>
+        </geometry>
+        <material name="light_grey"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-lower_leg_length/2.0}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${lower_leg_radius}" length="${lower_leg_length}"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_inertia m="${lower_leg_mass}" r="${lower_leg_radius}" h="${lower_leg_length}"/>
+    </link>
+
+    <joint name="${prefix}_lower_leg_joint" type="revolute">
+      <parent link="${prefix}_upper_leg_link"/>
+      <child link="${prefix}_lower_leg_link"/>
+      <origin xyz="0 0 ${-upper_leg_length}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-2.35" upper="0.0" effort="40.0" velocity="2.0"/>
+      <dynamics damping="0.3" friction="0.2"/>
+    </joint>
+
+    <!-- Wheel -->
+    <link name="${prefix}_wheel_link">
+      <visual>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_inertia m="${wheel_mass}" r="${wheel_radius}" h="${wheel_width}"/>
+    </link>
+
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="${prefix}_lower_leg_link"/>
+      <child link="${prefix}_wheel_link"/>
+      <origin xyz="0 ${y_sign * 0.03} ${-lower_leg_length}" rpy="${-pi/2.0} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <dynamics damping="0.1" friction="0.05"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Instantiate 4 leg-wheel modules -->
+  <xacro:leg_wheel_module prefix="fl" x_offset="${chassis_length/2.0 - 0.08}" y_offset="${chassis_width/2.0}"  y_sign="1"/>
+  <xacro:leg_wheel_module prefix="fr" x_offset="${chassis_length/2.0 - 0.08}" y_offset="${-chassis_width/2.0}" y_sign="-1"/>
+  <xacro:leg_wheel_module prefix="rl" x_offset="${-chassis_length/2.0 + 0.08}" y_offset="${chassis_width/2.0}"  y_sign="1"/>
+  <xacro:leg_wheel_module prefix="rr" x_offset="${-chassis_length/2.0 + 0.08}" y_offset="${-chassis_width/2.0}" y_sign="-1"/>
+
+  <!-- ===================== QUADROTOR ARM + ROTOR MACRO ===================== -->
+  <xacro:macro name="rotor_arm_module" params="prefix rotor_id x_offset y_offset yaw_offset">
+    <!-- Folding Arm -->
+    <link name="${prefix}_arm_link">
+      <visual>
+        <origin xyz="${arm_length/2.0} 0 0" rpy="0 ${pi/2.0} 0"/>
+        <geometry>
+          <cylinder radius="${arm_radius}" length="${arm_length}"/>
+        </geometry>
+        <material name="blue"/>
+      </visual>
+      <collision>
+        <origin xyz="${arm_length/2.0} 0 0" rpy="0 ${pi/2.0} 0"/>
+        <geometry>
+          <cylinder radius="${arm_radius}" length="${arm_length}"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_inertia m="${arm_mass}" r="${arm_radius}" h="${arm_length}"/>
+    </link>
+
+    <joint name="${prefix}_arm_joint" type="revolute">
+      <parent link="base_link"/>
+      <child link="${prefix}_arm_link"/>
+      <origin xyz="${x_offset} ${y_offset} ${chassis_height/2.0}" rpy="0 0 ${yaw_offset}"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="0.0" upper="1.57" effort="30.0" velocity="1.5"/>
+      <dynamics damping="0.3" friction="0.1"/>
+    </joint>
+
+    <!-- Rotor -->
+    <link name="rotor_${rotor_id}_link">
+      <visual>
+        <geometry>
+          <cylinder radius="${rotor_radius}" length="${rotor_thickness}"/>
+        </geometry>
+        <material name="red"/>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="${rotor_radius}" length="${rotor_thickness}"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_inertia m="${rotor_mass}" r="${rotor_radius}" h="${rotor_thickness}"/>
+    </link>
+
+    <joint name="rotor_${rotor_id}_joint" type="continuous">
+      <parent link="${prefix}_arm_link"/>
+      <child link="rotor_${rotor_id}_link"/>
+      <origin xyz="${arm_length} 0 ${rotor_thickness + 0.01}" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <dynamics damping="0.01" friction="0.005"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Instantiate 4 rotor arm modules -->
+  <xacro:rotor_arm_module prefix="front_left"  rotor_id="1" x_offset="${chassis_length/2.0 - 0.05}" y_offset="${chassis_width/2.0 - 0.05}"  yaw_offset="0.785"/>
+  <xacro:rotor_arm_module prefix="front_right" rotor_id="2" x_offset="${chassis_length/2.0 - 0.05}" y_offset="${-chassis_width/2.0 + 0.05}" yaw_offset="-0.785"/>
+  <xacro:rotor_arm_module prefix="rear_left"   rotor_id="3" x_offset="${-chassis_length/2.0 + 0.05}" y_offset="${chassis_width/2.0 - 0.05}"  yaw_offset="2.356"/>
+  <xacro:rotor_arm_module prefix="rear_right"  rotor_id="4" x_offset="${-chassis_length/2.0 + 0.05}" y_offset="${-chassis_width/2.0 + 0.05}" yaw_offset="-2.356"/>
+
+  <!-- ===================== SENSORS ===================== -->
+  
+  <!-- LiDAR -->
+  <link name="lidar_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.04" length="0.04"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.04" length="0.04"/>
+      </geometry>
+    </collision>
+    <xacro:cylinder_inertia m="0.2" r="0.04" h="0.04"/>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0 0 ${chassis_height/2.0 + 0.04}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Camera -->
+  <link name="camera_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.08 0.03"/>
+      </geometry>
+      <material name="dark_grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.03 0.08 0.03"/>
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="0.1" x="0.03" y="0.08" z="0.03"/>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="${chassis_length/2.0} 0 ${chassis_height/2.0 - 0.01}" rpy="0 0.18 0"/>
+  </joint>
+
+  <link name="camera_optical_link"/>
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_optical_link"/>
+    <origin xyz="0 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}"/>
+  </joint>
+
+  <!-- IMU -->
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="0.02 0.02 0.01"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.02 0.02 0.01"/>
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="0.05" x="0.02" y="0.02" z="0.01"/>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===================== GAZEBO SENSOR PLUGINS ===================== -->
+  <gazebo reference="lidar_link">
+    <sensor type="ray" name="lidar_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <visualize>true</visualize>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.12</min>
+          <max>12.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_lidar" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <remapping>~/out:=/scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>lidar_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="camera_link">
+    <sensor type="camera" name="camera_sensor">
+      <always_on>true</always_on>
+      <update_rate>30</update_rate>
+      <visualize>true</visualize>
+      <camera>
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>100.0</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="gazebo_ros_camera" filename="libgazebo_ros_camera.so">
+        <ros>
+          <remapping>~/image_raw:=/camera/image_raw</remapping>
+          <remapping>~/camera_info:=/camera/camera_info</remapping>
+        </ros>
+        <camera_name>camera</camera_name>
+        <frame_name>camera_optical_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="imu_link">
+    <sensor type="imu" name="imu_sensor">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <imu>
+        <angular_velocity>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.0002</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.0002</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.0002</stddev></noise></z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>0.017</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>0.017</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>0.017</stddev></noise></z>
+        </linear_acceleration>
+      </imu>
+      <plugin name="gazebo_ros_imu" filename="libgazebo_ros_imu_sensor.so">
+        <ros>
+          <remapping>~/out:=/imu/data</remapping>
+        </ros>
+        <frame_name>imu_link</frame_name>
+        <initial_orientation_as_reference>false</initial_orientation_as_reference>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- Gazebo friction for wheels -->
+  <xacro:macro name="wheel_gazebo" params="prefix">
+    <gazebo reference="${prefix}_wheel_link">
+      <mu1>1.5</mu1>
+      <mu2>1.5</mu2>
+      <kp>1000000.0</kp>
+      <kd>100.0</kd>
+      <material>Gazebo/DarkGrey</material>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:wheel_gazebo prefix="fl"/>
+  <xacro:wheel_gazebo prefix="fr"/>
+  <xacro:wheel_gazebo prefix="rl"/>
+  <xacro:wheel_gazebo prefix="rr"/>
+
+  <!-- ===================== ROS2_CONTROL HARDWARE INTERFACE ===================== -->
+  <ros2_control name="AeroTerraBotSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+
+    <!-- Wheel Joints - Velocity Interface -->
+    <joint name="fl_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-20.0</param>
+        <param name="max">20.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="fr_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-20.0</param>
+        <param name="max">20.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rl_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-20.0</param>
+        <param name="max">20.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rr_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-20.0</param>
+        <param name="max">20.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <!-- Upper Leg Joints - Position Interface -->
+    <joint name="fl_upper_leg_joint">
+      <command_interface name="position">
+        <param name="min">-1.57</param>
+        <param name="max">1.57</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="fr_upper_leg_joint">
+      <command_interface name="position">
+        <param name="min">-1.57</param>
+        <param name="max">1.57</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rl_upper_leg_joint">
+      <command_interface name="position">
+        <param name="min">-1.57</param>
+        <param name="max">1.57</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rr_upper_leg_joint">
+      <command_interface name="position">
+        <param name="min">-1.57</param>
+        <param name="max">1.57</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <!-- Lower Leg Joints - Position Interface -->
+    <joint name="fl_lower_leg_joint">
+      <command_interface name="position">
+        <param name="min">-2.35</param>
+        <param name="max">0.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="fr_lower_leg_joint">
+      <command_interface name="position">
+        <param name="min">-2.35</param>
+        <param name="max">0.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rl_lower_leg_joint">
+      <command_interface name="position">
+        <param name="min">-2.35</param>
+        <param name="max">0.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rr_lower_leg_joint">
+      <command_interface name="position">
+        <param name="min">-2.35</param>
+        <param name="max">0.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <!-- Arm Transform Joints - Position Interface -->
+    <joint name="front_left_arm_joint">
+      <command_interface name="position">
+        <param name="min">0.0</param>
+        <param name="max">1.57</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="front_right_arm_joint">
+      <command_interface name="position">
+        <param name="min">0.0</param>
+        <param name="max">1.57</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rear_left_arm_joint">
+      <command_interface name="position">
+        <param name="min">0.0</param>
+        <param name="max">1.57</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rear_right_arm_joint">
+      <command_interface name="position">
+        <param name="min">0.0</param>
+        <param name="max">1.57</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <!-- Rotor Joints - Velocity Interface -->
+    <joint name="rotor_1_joint">
+      <command_interface name="velocity">
+        <param name="min">-1000.0</param>
+        <param name="max">1000.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rotor_2_joint">
+      <command_interface name="velocity">
+        <param name="min">-1000.0</param>
+        <param name="max">1000.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rotor_3_joint">
+      <command_interface name="velocity">
+        <param name="min">-1000.0</param>
+        <param name="max">1000.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rotor_4_joint">
+      <command_interface name="velocity">
+        <param name="min">-1000.0</param>
+        <param name="max">1000.0</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <!-- Gazebo ros2_control plugin -->
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>$(find aeroterrabot_control)/config/controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>

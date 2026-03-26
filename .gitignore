@@ -1,0 +1,14 @@
+# ROS 2 Colcon workspace folders
+aeroterrabot_ws/build/
+aeroterrabot_ws/install/
+aeroterrabot_ws/log/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# IDEs
+.vscode/
+.idea/
+*.swp

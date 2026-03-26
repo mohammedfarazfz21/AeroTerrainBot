@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>aeroterrabot_bringup</name>
+  <version>1.0.0</version>
+  <description>Orchestration launch files for AeroTerraBot system</description>
+  <maintainer email="aeroterrabot@dev.local">AeroTerraBot Dev</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>aeroterrabot_description</depend>
+  <depend>aeroterrabot_control</depend>
+  <depend>aeroterrabot_gazebo</depend>
+  <depend>aeroterrabot_navigation</depend>
+  <depend>aeroterrabot_transform_controller</depend>
+  <depend>aeroterrabot_flight_system</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
