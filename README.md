@@ -29,10 +29,6 @@ Designed for high-versatility missions, it solves the "last-mile" problem in com
 | ![Tank Mode](docs/images/tank_mode_rviz.png) | ![Flight Mode](docs/images/flight_mode_rviz.png) |
 | *Wheels down, booms horizontal for ground traversal.* | *Booms rotated 90° up; wheels serve as prop-guards.* |
 
-### Simulation Environment (Gazebo Harmonic)
-![Gazebo Simulation](docs/images/gazebo_simulation.png)
-*Robotic state validation and sensor feedback integration in the Gazebo Sim physics environment.*
-
 ---
 
 ## 🛠️ Technical Architecture
