@@ -3,17 +3,23 @@
   ros2_control hardware binding for AeroTerraBot.
   Include this XACRO in the main robot URDF to register the Teensy 4.0
   SystemInterface plugin with the controller manager.
+  Use use_sim:=true when launching with Gazebo.
 -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:macro name="aeroterrabot_ros2_control"
-               params="serial_port:=/dev/ttyACM0 baud_rate:=115200">
+               params="serial_port:=/dev/ttyACM0 baud_rate:=115200 use_sim:=false">
 
     <ros2_control name="AeroTerraBotSystem" type="system">
 
       <hardware>
-        <plugin>aeroterrabot_hardware/AeroTerraBotSystemInterface</plugin>
-        <param name="serial_port">${serial_port}</param>
-        <param name="baud_rate">${baud_rate}</param>
+        <xacro:if value="${use_sim}">
+          <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        </xacro:if>
+        <xacro:unless value="${use_sim}">
+          <plugin>aeroterrabot_hardware/AeroTerraBotSystemInterface</plugin>
+          <param name="serial_port">${serial_port}</param>
+          <param name="baud_rate">${baud_rate}</param>
+        </xacro:unless>
       </hardware>
 
       <!-- ═══ Wheel Joints (velocity) ═══════════════════════════════════ -->
@@ -129,6 +135,16 @@
       </joint>
 
     </ros2_control>
+
+    <!-- ── Gazebo Sim Controller Plugin (only active in simulation) ──────── -->
+    <xacro:if value="${use_sim}">
+      <gazebo>
+        <plugin filename="gz_ros2_control-system"
+                name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+          <parameters>$(find aeroterrabot_control)/config/controllers.yaml</parameters>
+        </plugin>
+      </gazebo>
+    </xacro:if>
 
   </xacro:macro>
 </robot>

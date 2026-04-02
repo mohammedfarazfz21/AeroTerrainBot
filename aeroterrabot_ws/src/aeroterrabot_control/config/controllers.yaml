@@ -19,11 +19,14 @@ controller_manager:
     morph_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
+    rotor_controller:
+      type: velocity_controllers/JointGroupVelocityController
+
 # ── Joint State Broadcaster ──────────────────────────────────────────────────
 # Publishes ALL 12 joint states to /joint_states (used by robot_state_publisher)
 joint_state_broadcaster:
   ros__parameters:
-    use_sim_time: false
+    use_sim_time: true
 
 # ── Tank Drive Controller (Skid-Steer) ───────────────────────────────────────
 # Active in TANK MODE: commands the 4 wheel motors via velocity interface.
@@ -72,7 +75,7 @@ tank_drive_controller:
     angular.z.max_velocity: 3.14         # rad/s
     angular.z.max_acceleration: 6.28     # rad/s²
 
-    use_sim_time: false
+    use_sim_time: true
 
 # ── Morph Controller (Joint Trajectory) ──────────────────────────────────────
 # Controls the 2 servos and 2 linear actuators that perform the physical
@@ -115,4 +118,17 @@ morph_controller:
         trajectory: 0.01
         goal: 0.005
 
-    use_sim_time: false
+    use_sim_time: true
+
+# ── Rotor Controller ─────────────────────────────────────────────────────────
+# Velocity commands for the 4 quadrotor flight motors (FLIGHT MODE only).
+# Send RPM setpoints to each rotor independently as a group.
+rotor_controller:
+  ros__parameters:
+    joints:
+      - rotor_front_left_joint
+      - rotor_front_right_joint
+      - rotor_rear_left_joint
+      - rotor_rear_right_joint
+    interface_name: velocity
+    use_sim_time: true

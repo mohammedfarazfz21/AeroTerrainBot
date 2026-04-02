@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="aeroterrabot">
 
+    <!-- ── Xacro arguments ─────────────────────────────────────────────── -->
+    <xacro:arg name="use_sim_time" default="false" />
+    <xacro:property name="use_sim" value="$(arg use_sim_time)" />
+
     <!-- Include the core robot components -->
     <xacro:include filename="robot_core.xacro" />
 
@@ -10,10 +14,14 @@
     <!-- Include the ros2_control configuration -->
     <xacro:include filename="ros2_control.xacro" />
 
-    <!-- Example of parameterizing the hardware interface -->
+    <!-- Include the sensors configuration -->
+    <xacro:include filename="sensors.xacro" />
+
+    <!-- Parameterize the hardware interface -->
     <xacro:aeroterrabot_ros2_control 
         serial_port="/dev/ttyACM0" 
-        baud_rate="115200" 
+        baud_rate="115200"
+        use_sim="${use_sim}"
     />
 
 </robot>

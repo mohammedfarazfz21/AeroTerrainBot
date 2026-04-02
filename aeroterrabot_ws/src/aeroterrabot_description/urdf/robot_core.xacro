@@ -39,6 +39,35 @@
     </xacro:inertial_box>
   </link>
 
+  <!-- ── LANDING GEAR ────────────────────────────────────────────────────────── -->
+  <xacro:macro name="landing_gear_leg" params="name x y">
+    <joint name="landing_gear_${name}_joint" type="fixed">
+      <parent link="chassis"/>
+      <child link="landing_gear_${name}"/>
+      <origin xyz="${x} ${y} -0.01" rpy="0 0 0"/>
+    </joint>
+
+    <link name="landing_gear_${name}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.01" length="0.02"/></geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.01" length="0.02"/></geometry>
+      </collision>
+      <xacro:inertial_cylinder mass="0.05" length="0.02" radius="0.01">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+      </xacro:inertial_cylinder>
+    </link>
+  </xacro:macro>
+
+  <xacro:landing_gear_leg name="front_left" x="0.28" y="0.08" />
+  <xacro:landing_gear_leg name="front_right" x="0.28" y="-0.08" />
+  <xacro:landing_gear_leg name="rear_left" x="0.02" y="0.08" />
+  <xacro:landing_gear_leg name="rear_right" x="0.02" y="-0.08" />
+
   <!-- ── LEFT MORPHING MECHANISM ────────────────────────────────────────────── -->
   <!-- Actuator pushes left boom outwards. Servo rolls it 90 degrees to point wheels UP. -->
   <joint name="linear_actuator_1_joint" type="prismatic">
@@ -134,6 +163,12 @@
       <geometry><cylinder length="0.03" radius="0.12"/></geometry>
       <material name="black"/>
     </visual>
+    <!-- Spoke to make rotation visible -->
+    <visual>
+      <origin xyz="0.06 0 0.02" rpy="0 0 0"/>
+      <geometry><box size="0.02 0.02 0.04"/></geometry>
+      <material name="white"/>
+    </visual>
     <collision>
       <geometry><cylinder length="0.03" radius="0.12"/></geometry>
     </collision>
@@ -153,6 +188,12 @@
     <visual>
       <geometry><cylinder length="0.03" radius="0.12"/></geometry>
       <material name="black"/>
+    </visual>
+    <!-- Spoke to make rotation visible -->
+    <visual>
+      <origin xyz="0.06 0 0.02" rpy="0 0 0"/>
+      <geometry><box size="0.02 0.02 0.04"/></geometry>
+      <material name="white"/>
     </visual>
     <collision>
       <geometry><cylinder length="0.03" radius="0.12"/></geometry>
@@ -174,6 +215,12 @@
       <geometry><cylinder length="0.03" radius="0.12"/></geometry>
       <material name="black"/>
     </visual>
+    <!-- Spoke to make rotation visible -->
+    <visual>
+      <origin xyz="0.06 0 0.02" rpy="0 0 0"/>
+      <geometry><box size="0.02 0.02 0.04"/></geometry>
+      <material name="white"/>
+    </visual>
     <collision>
       <geometry><cylinder length="0.03" radius="0.12"/></geometry>
     </collision>
@@ -194,6 +241,12 @@
       <geometry><cylinder length="0.03" radius="0.12"/></geometry>
       <material name="black"/>
     </visual>
+    <!-- Spoke to make rotation visible -->
+    <visual>
+      <origin xyz="0.06 0 0.02" rpy="0 0 0"/>
+      <geometry><box size="0.02 0.02 0.04"/></geometry>
+      <material name="white"/>
+    </visual>
     <collision>
       <geometry><cylinder length="0.03" radius="0.12"/></geometry>
     </collision>
@@ -201,6 +254,24 @@
       <origin xyz="0 0 0" rpy="0 0 0"/>
     </xacro:inertial_cylinder>
   </link>
+
+  <!-- Gazebo Friction tags for wheels -->
+  <gazebo reference="front_left_wheel">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+  </gazebo>
+  <gazebo reference="front_right_wheel">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+  </gazebo>
+  <gazebo reference="rear_left_wheel">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+  </gazebo>
+  <gazebo reference="rear_right_wheel">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+  </gazebo>
 
   <!-- ── ROTORS ────────────────────────────────────────────────────────────── -->
   <!-- Rotors attach directly to the boom frame, avoiding rotation when driving -->

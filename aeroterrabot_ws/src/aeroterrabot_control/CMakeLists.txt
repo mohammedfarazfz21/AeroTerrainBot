@@ -3,10 +3,10 @@ project(aeroterrabot_control)
 
 find_package(ament_cmake REQUIRED)
 
-# Install config files
+# Install config and launch files
 install(
-  DIRECTORY config/
-  DESTINATION share/${PROJECT_NAME}/config
+  DIRECTORY config/ launch/
+  DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
