@@ -1,4 +1,4 @@
-# AeroTerrainBot: Hybrid Morphing Robotics Platform 🚁🚜
+# AeroTerrainBot: Hybrid Morphing Robotics Platform 
 
 [![ROS 2 Jazzy](https://img.shields.io/badge/ROS2-Jazzy-blue?logo=ros)](https://docs.ros.org/en/jazzy/index.html)
 [![Gazebo Harmonic](https://img.shields.io/badge/Gazebo-Harmonic-orange?logo=gazebo)](https://gazebosim.org/home)
