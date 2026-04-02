@@ -1,22 +1,15 @@
 version: '3.8'
 
 services:
-  aeroterrabot:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: aeroterrabot_dev
-    # Mount the local aeroterrabot_ws into the container for live editing
+  aeroterrabot_dev:
+    build: .
     volumes:
-      - ./aeroterrabot_ws:/aeroterrabot_ws
-    # Settings to allow GUI forwarding (Gazebo/RViz) from Docker to Windows (requires WSLg or X11 like VcXsrv)
-    environment:
-      - DISPLAY=${DISPLAY}
-      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
-      - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
-      - PULSE_SERVER=${PULSE_SERVER}
-    # Allocate a pseudo-TTY and keep stdin open
-    stdin_open: true
+      - .:/workspace
+    privileged: true
+    network_mode: host
     tty: true
-    # Run container in host network mode (best for ROS 2 DDS discovery)
-    network_mode: "host"
+    stdin_open: true
+    environment:
+      - DISPLAY=host.docker.internal:0.0
+      - LIBGL_ALWAYS_INDIRECT=0
+    command: /bin/bash

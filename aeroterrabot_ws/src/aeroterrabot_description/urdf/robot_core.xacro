@@ -1,0 +1,245 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="inertias.xacro" />
+
+  <!-- ── BASE LINKS ────────────────────────────────────────────────────────── -->
+  <link name="base_link"></link>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_footprint"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="base_footprint"></link>
+
+  <joint name="chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+    <origin xyz="-0.1 0 0"/>
+  </joint>
+
+  <link name="chassis">
+    <visual>
+      <origin xyz="0.15 0 0.075"/>
+      <geometry>
+        <box size="0.3 0.2 0.15"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <origin xyz="0.15 0 0.075"/>
+      <geometry>
+        <box size="0.3 0.2 0.15"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_box mass="1.0" x="0.3" y="0.2" z="0.15">
+      <origin xyz="0.15 0 0.075" rpy="0 0 0"/>
+    </xacro:inertial_box>
+  </link>
+
+  <!-- ── LEFT MORPHING MECHANISM ────────────────────────────────────────────── -->
+  <!-- Actuator pushes left boom outwards. Servo rolls it 90 degrees to point wheels UP. -->
+  <joint name="linear_actuator_1_joint" type="prismatic">
+    <parent link="chassis"/>
+    <child link="left_extension_arm"/>
+    <origin xyz="0.15 0.1 0.075" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="0" upper="0.1" effort="10" velocity="0.05"/>
+  </joint>
+
+  <link name="left_extension_arm">
+    <visual>
+      <origin xyz="0 0.025 0" rpy="1.5708 0 0"/>
+      <geometry><cylinder length="0.05" radius="0.015"/></geometry>
+      <material name="orange"/>
+    </visual>
+    <xacro:inertial_cylinder mass="0.1" length="0.05" radius="0.015">
+      <origin xyz="0 0.025 0" rpy="1.5708 0 0"/>
+    </xacro:inertial_cylinder>
+  </link>
+
+  <joint name="morph_servo_1_joint" type="revolute">
+    <parent link="left_extension_arm"/>
+    <child link="left_boom"/>
+    <origin xyz="0 0.05 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="0" upper="1.5708" effort="10" velocity="1.0"/>
+  </joint>
+
+  <link name="left_boom">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.5708 0"/>
+      <geometry><cylinder length="0.3" radius="0.02"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <xacro:inertial_cylinder mass="0.2" length="0.3" radius="0.02">
+      <origin xyz="0 0 0" rpy="0 1.5708 0"/>
+    </xacro:inertial_cylinder>
+  </link>
+
+  <!-- ── RIGHT MORPHING MECHANISM ───────────────────────────────────────────── -->
+  
+  <joint name="linear_actuator_2_joint" type="prismatic">
+    <parent link="chassis"/>
+    <child link="right_extension_arm"/>
+    <origin xyz="0.15 -0.1 0.075" rpy="0 0 0"/>
+    <axis xyz="0 -1 0"/>
+    <limit lower="0" upper="0.1" effort="10" velocity="0.05"/>
+  </joint>
+
+  <link name="right_extension_arm">
+    <visual>
+      <origin xyz="0 -0.025 0" rpy="1.5708 0 0"/>
+      <geometry><cylinder length="0.05" radius="0.015"/></geometry>
+      <material name="orange"/>
+    </visual>
+    <xacro:inertial_cylinder mass="0.1" length="0.05" radius="0.015">
+      <origin xyz="0 -0.025 0" rpy="1.5708 0 0"/>
+    </xacro:inertial_cylinder>
+  </link>
+
+  <joint name="morph_servo_2_joint" type="revolute">
+    <parent link="right_extension_arm"/>
+    <child link="right_boom"/>
+    <origin xyz="0 -0.05 0" rpy="0 0 0"/>
+    <axis xyz="-1 0 0"/>
+    <limit lower="0" upper="1.5708" effort="10" velocity="1.0"/>
+  </joint>
+
+  <link name="right_boom">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.5708 0"/>
+      <geometry><cylinder length="0.3" radius="0.02"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <xacro:inertial_cylinder mass="0.2" length="0.3" radius="0.02">
+      <origin xyz="0 0 0" rpy="0 1.5708 0"/>
+    </xacro:inertial_cylinder>
+  </link>
+
+  <!-- ── WHEELS & PROPELLOR GUARDS (R=0.12) ────────────────────────────────── -->
+  <!-- We use continuous joints to permit driving. -->
+
+  <joint name="front_left_wheel_joint" type="continuous">
+    <parent link="left_boom"/>
+    <child link="front_left_wheel"/>
+    <origin xyz="0.15 0.05 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <link name="front_left_wheel">
+    <visual>
+      <geometry><cylinder length="0.03" radius="0.12"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.03" radius="0.12"/></geometry>
+    </collision>
+    <xacro:inertial_cylinder mass="0.1" length="0.03" radius="0.12">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:inertial_cylinder>
+  </link>
+
+  <joint name="rear_left_wheel_joint" type="continuous">
+    <parent link="left_boom"/>
+    <child link="rear_left_wheel"/>
+    <origin xyz="-0.15 0.05 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <link name="rear_left_wheel">
+    <visual>
+      <geometry><cylinder length="0.03" radius="0.12"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.03" radius="0.12"/></geometry>
+    </collision>
+    <xacro:inertial_cylinder mass="0.1" length="0.03" radius="0.12">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:inertial_cylinder>
+  </link>
+
+  <joint name="front_right_wheel_joint" type="continuous">
+    <parent link="right_boom"/>
+    <child link="front_right_wheel"/>
+    <origin xyz="0.15 -0.05 0" rpy="1.5708 0 0"/>
+    <axis xyz="0 0 -1"/>
+  </joint>
+
+  <link name="front_right_wheel">
+    <visual>
+      <geometry><cylinder length="0.03" radius="0.12"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.03" radius="0.12"/></geometry>
+    </collision>
+    <xacro:inertial_cylinder mass="0.1" length="0.03" radius="0.12">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:inertial_cylinder>
+  </link>
+
+  <joint name="rear_right_wheel_joint" type="continuous">
+    <parent link="right_boom"/>
+    <child link="rear_right_wheel"/>
+    <origin xyz="-0.15 -0.05 0" rpy="1.5708 0 0"/>
+    <axis xyz="0 0 -1"/>
+  </joint>
+
+  <link name="rear_right_wheel">
+    <visual>
+      <geometry><cylinder length="0.03" radius="0.12"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.03" radius="0.12"/></geometry>
+    </collision>
+    <xacro:inertial_cylinder mass="0.1" length="0.03" radius="0.12">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:inertial_cylinder>
+  </link>
+
+  <!-- ── ROTORS ────────────────────────────────────────────────────────────── -->
+  <!-- Rotors attach directly to the boom frame, avoiding rotation when driving -->
+  
+  <xacro:macro name="rotor" params="name parent *origin">
+    <joint name="rotor_${name}_joint" type="continuous">
+      <parent link="${parent}"/>
+      <child link="rotor_${name}"/>
+      <xacro:insert_block name="origin"/>
+      <axis xyz="0 0 1"/> 
+    </joint>
+    <link name="rotor_${name}">
+      <visual>
+        <origin xyz="0 0 0.02"/>
+        <geometry>
+          <box size="0.22 0.02 0.01"/>
+        </geometry>
+        <material name="red"/>
+      </visual>
+      <xacro:inertial_box mass="0.05" x="0.22" y="0.02" z="0.01">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+      </xacro:inertial_box>
+    </link>
+  </xacro:macro>
+
+  <xacro:rotor name="front_left" parent="left_boom">
+    <origin xyz="0.15 0.05 0" rpy="-1.5708 0 0"/>
+  </xacro:rotor>
+
+  <xacro:rotor name="rear_left" parent="left_boom">
+    <origin xyz="-0.15 0.05 0" rpy="-1.5708 0 0"/>
+  </xacro:rotor>
+
+  <xacro:rotor name="front_right" parent="right_boom">
+    <origin xyz="0.15 -0.05 0" rpy="1.5708 0 0"/>
+  </xacro:rotor>
+
+  <xacro:rotor name="rear_right" parent="right_boom">
+    <origin xyz="-0.15 -0.05 0" rpy="1.5708 0 0"/>
+  </xacro:rotor>
+
+</robot>

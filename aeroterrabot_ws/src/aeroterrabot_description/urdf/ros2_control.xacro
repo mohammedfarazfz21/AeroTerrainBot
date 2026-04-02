@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<!--
+  ros2_control hardware binding for AeroTerraBot.
+  Include this XACRO in the main robot URDF to register the Teensy 4.0
+  SystemInterface plugin with the controller manager.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="aeroterrabot_ros2_control"
+               params="serial_port:=/dev/ttyACM0 baud_rate:=115200">
+
+    <ros2_control name="AeroTerraBotSystem" type="system">
+
+      <hardware>
+        <plugin>aeroterrabot_hardware/AeroTerraBotSystemInterface</plugin>
+        <param name="serial_port">${serial_port}</param>
+        <param name="baud_rate">${baud_rate}</param>
+      </hardware>
+
+      <!-- ═══ Wheel Joints (velocity) ═══════════════════════════════════ -->
+      <joint name="front_left_wheel_joint">
+        <command_interface name="velocity">
+          <param name="min">-10.0</param>
+          <param name="max">10.0</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <joint name="front_right_wheel_joint">
+        <command_interface name="velocity">
+          <param name="min">-10.0</param>
+          <param name="max">10.0</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <joint name="rear_left_wheel_joint">
+        <command_interface name="velocity">
+          <param name="min">-10.0</param>
+          <param name="max">10.0</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <joint name="rear_right_wheel_joint">
+        <command_interface name="velocity">
+          <param name="min">-10.0</param>
+          <param name="max">10.0</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <!-- ═══ Rotor Joints (velocity — drone thrust) ════════════════════ -->
+      <joint name="rotor_front_left_joint">
+        <command_interface name="velocity">
+          <param name="min">0.0</param>
+          <param name="max">1000.0</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <joint name="rotor_front_right_joint">
+        <command_interface name="velocity">
+          <param name="min">0.0</param>
+          <param name="max">1000.0</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <joint name="rotor_rear_left_joint">
+        <command_interface name="velocity">
+          <param name="min">0.0</param>
+          <param name="max">1000.0</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <joint name="rotor_rear_right_joint">
+        <command_interface name="velocity">
+          <param name="min">0.0</param>
+          <param name="max">1000.0</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <!-- ═══ Morphing Servo Joints (position) ══════════════════════════ -->
+      <joint name="morph_servo_1_joint">
+        <command_interface name="position">
+          <param name="min">0.0</param>
+          <param name="max">3.14159</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <joint name="morph_servo_2_joint">
+        <command_interface name="position">
+          <param name="min">0.0</param>
+          <param name="max">3.14159</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <!-- ═══ Linear Actuator Joints (position) ═════════════════════════ -->
+      <joint name="linear_actuator_1_joint">
+        <command_interface name="position">
+          <param name="min">0.0</param>
+          <param name="max">0.10</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <joint name="linear_actuator_2_joint">
+        <command_interface name="position">
+          <param name="min">0.0</param>
+          <param name="max">0.10</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+    </ros2_control>
+
+  </xacro:macro>
+</robot>

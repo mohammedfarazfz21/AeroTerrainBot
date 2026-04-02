@@ -1,36 +1,19 @@
-FROM osrf/ros:humble-desktop
+FROM osrf/ros:jazzy-desktop
 
-# Avoid user interaction during apt installations
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Update and install required dependencies for AeroTerraBot
+# ── Install dependencies ──────────────────────────────────────────────────────
 RUN apt-get update && apt-get install -y \
     python3-colcon-common-extensions \
-    ros-humble-gazebo-ros-pkgs \
-    ros-humble-ros2-control \
-    ros-humble-gazebo-ros2-control \
-    ros-humble-joint-state-publisher-gui \
-    ros-humble-robot-state-publisher \
-    ros-humble-diff-drive-controller \
-    ros-humble-joint-trajectory-controller \
-    ros-humble-velocity-controllers \
-    ros-humble-position-controllers \
-    ros-humble-nav2-bringup \
-    ros-humble-slam-toolbox \
-    ros-humble-xacro \
-    x11-apps \
-    mesa-utils \
+    python3-vcstool \
+    ros-jazzy-ros2-control \
+    ros-jazzy-ros2-controllers \
+    ros-jazzy-joint-state-publisher-gui \
+    ros-jazzy-xacro \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
-# Setup bashrc to always source ROS 2 and the workspace
-RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc \
-    && echo "if [ -f /aeroterrabot_ws/install/setup.bash ]; then source /aeroterrabot_ws/install/setup.bash; fi" >> ~/.bashrc
+# ── Workspace setup ───────────────────────────────────────────────────────────
+WORKDIR /workspace
+ENV SHELL /bin/bash
 
-# Set the working directory
-WORKDIR /aeroterrabot_ws
-
-# Optional: You can copy your local workspace to the image directly
-# COPY ./aeroterrabot_ws /aeroterrabot_ws
-
-# Default command (gives you an interactive terminal)
-CMD ["bash"]
+# Source ROS 2 setup automatically
+RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc

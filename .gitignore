@@ -1,7 +1,9 @@
-# ROS 2 Colcon workspace folders
-aeroterrabot_ws/build/
-aeroterrabot_ws/install/
-aeroterrabot_ws/log/
+# ROS 2 build directories
+build/
+install/
+log/
+build_ros/
+install_ros/
 
 # Python
 __pycache__/
@@ -12,3 +14,8 @@ __pycache__/
 .vscode/
 .idea/
 *.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

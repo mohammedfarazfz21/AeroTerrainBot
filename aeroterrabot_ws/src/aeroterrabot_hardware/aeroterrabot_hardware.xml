@@ -1,0 +1,11 @@
+<library path="aeroterrabot_hardware">
+  <class name="aeroterrabot_hardware/AeroTerraBotSystemInterface"
+         type="aeroterrabot_hardware::AeroTerraBotSystemInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      ros2_control SystemInterface for the AeroTerraBot morphing robot.
+      Communicates with a Teensy 4.0 over serial to drive wheels, rotors,
+      servos, and linear actuators.
+    </description>
+  </class>
+</library>

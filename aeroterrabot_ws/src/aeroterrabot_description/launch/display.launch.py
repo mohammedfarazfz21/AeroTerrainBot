@@ -1,50 +1,51 @@
 import os
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, Command
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
-from ament_index_python.packages import get_package_share_directory
-
 
 def generate_launch_description():
+
+    # ── PATHS ─────────────────────────────────────────────────────────────────
     pkg_description = get_package_share_directory('aeroterrabot_description')
+    urdf_file       = os.path.join(pkg_description, 'urdf', 'robot.urdf.xacro')
+    rviz_config_file = os.path.join(pkg_description, 'rviz', 'view_robot.rviz')
 
-    xacro_file = os.path.join(pkg_description, 'urdf', 'aeroterrabot.urdf.xacro')
+    # ── ARGUMENTS ─────────────────────────────────────────────────────────────
+    # None for this simple display launch
 
-    use_sim_time = LaunchConfiguration('use_sim_time')
-    use_gui = LaunchConfiguration('use_gui')
+    # ── NODES ─────────────────────────────────────────────────────────────────
 
-    robot_description = ParameterValue(
-        Command(['xacro ', xacro_file]),
-        value_type=str
+    # 1. Robot State Publisher
+    robot_description_config = Command(['xacro ', urdf_file])
+    
+    node_robot_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        output='screen',
+        parameters=[{'robot_description': robot_description_config}]
     )
 
+    # 2. Joint State Publisher GUI (For testing kinematics without controllers)
+    node_joint_state_publisher_gui = Node(
+        package='joint_state_publisher_gui',
+        executable='joint_state_publisher_gui',
+        output='screen'
+    )
+
+    # 3. RViz
+    node_rviz = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config_file],
+    )
+
+    # ── LAUNCH DESCRIPTION ────────────────────────────────────────────────────
     return LaunchDescription([
-        DeclareLaunchArgument('use_sim_time', default_value='false'),
-        DeclareLaunchArgument('use_gui', default_value='true'),
-
-        Node(
-            package='robot_state_publisher',
-            executable='robot_state_publisher',
-            parameters=[{
-                'robot_description': robot_description,
-                'use_sim_time': use_sim_time,
-            }],
-            output='screen',
-        ),
-
-        Node(
-            package='joint_state_publisher_gui',
-            executable='joint_state_publisher_gui',
-            condition=launch.conditions.IfCondition(use_gui),
-            output='screen',
-        ),
-
-        Node(
-            package='rviz2',
-            executable='rviz2',
-            arguments=['-d', os.path.join(pkg_description, 'rviz', 'aeroterrabot_visualization.rviz')],
-            output='screen',
-        ),
+        node_robot_state_publisher,
+        node_joint_state_publisher_gui,
+        node_rviz
     ])

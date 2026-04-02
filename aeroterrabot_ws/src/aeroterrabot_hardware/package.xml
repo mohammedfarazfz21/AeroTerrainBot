@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>aeroterrabot_bringup</name>
+  <name>aeroterrabot_hardware</name>
   <version>0.0.1</version>
-  <description>Orchestration launch files for AeroTerraBot.</description>
+  <description>ros2_control hardware interface for AeroTerraBot (Teensy 4.0 serial) and Arduino sensor bridge.</description>
   <maintainer email="user@todo.todo">USER</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <exec_depend>aeroterrabot_description</exec_depend>
-  <exec_depend>aeroterrabot_control</exec_depend>
-  <exec_depend>aeroterrabot_hardware</exec_depend>
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>controller_manager</exec_depend>
+  <depend>hardware_interface</depend>
+  <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>aeroterrabot_interfaces</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
